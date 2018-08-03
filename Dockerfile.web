@@ -1,0 +1,28 @@
+FROM node:10.8 as static_build
+
+WORKDIR /src/
+
+COPY components /src/
+RUN yarn
+
+FROM python:2.7
+
+WORKDIR /opt/django-DefectDojo/
+
+COPY dojo /opt/django-DefectDojo/dojo/
+COPY setup.py /opt/django-DefectDojo/
+COPY manage.py /opt/django-DefectDojo/
+
+RUN pip install .
+
+COPY docker/settings.py /opt/django-DefectDojo/dojo/settings/
+COPY docker/docker-entrypoint.sh /opt/django-DefectDojo/docker-entrypoint.sh
+
+COPY --from=static_build /src/ /opt/django-DefectDojo/components/
+RUN python manage.py collectstatic --noinput && rm -r components
+
+RUN mkdir /opt/django-DefectDojo/celery
+
+EXPOSE 8000
+
+CMD ./docker-entrypoint.sh

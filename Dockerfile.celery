@@ -1,0 +1,18 @@
+FROM python:2.7
+ENV C_FORCE_ROOT TRUE
+
+WORKDIR /opt/django-DefectDojo/
+
+COPY dojo /opt/django-DefectDojo/dojo/
+COPY setup.py /opt/django-DefectDojo/
+COPY manage.py /opt/django-DefectDojo/
+
+RUN pip install .
+
+COPY docker/settings.py /opt/django-DefectDojo/dojo/settings/
+COPY docker/docker-entrypoint.sh /opt/django-DefectDojo/docker-entrypoint.sh
+
+RUN mkdir /opt/django-DefectDojo/celery
+
+ENTRYPOINT ["celery"]
+CMD ["-A", "dojo", "worker", "-l", "info", "--concurrency", "3"]

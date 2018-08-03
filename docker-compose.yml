@@ -1,0 +1,26 @@
+---
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - 8000:8000
+    volumes:
+      - celery:/opt/django-DefectDojo/celery
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    volumes:
+      - celery:/opt/django-DefectDojo/celery
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    command: beat -A dojo -l info
+    volumes:
+      - celery:/opt/django-DefectDojo/celery
+volumes:
+  celery:
